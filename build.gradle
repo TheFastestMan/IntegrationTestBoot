@@ -1,0 +1,46 @@
+plugins {
+    id 'java'
+    id("io.freefair.lombok") version "8.4"
+    id 'org.springframework.boot' version '3.2.1'
+    id 'io.spring.dependency-management' version '1.1.4'
+}
+
+group = 'com.example'
+version = '0.0.1-SNAPSHOT'
+
+java {
+    sourceCompatibility = '17'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter'
+    implementation 'org.springframework.boot:spring-boot-starter-test'
+
+    implementation 'org.slf4j:slf4j-api:2.0.9'
+
+    implementation 'org.modelmapper:modelmapper:2.1.1'
+
+    implementation 'org.hibernate:hibernate-core:6.4.1.Final'
+
+    implementation 'org.apache.commons:commons-dbcp2:2.9.0'
+    implementation 'org.postgresql:postgresql'
+
+    implementation 'org.springframework:spring-orm'
+
+    implementation 'org.springframework:spring-context'
+
+    implementation 'org.springframework:spring-core'
+
+   // testImplementation 'com.h2database:h2'
+
+    testImplementation 'org.junit.jupiter:junit-jupiter-api'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
