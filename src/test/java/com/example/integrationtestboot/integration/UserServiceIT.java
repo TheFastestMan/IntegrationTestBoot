@@ -1,13 +1,11 @@
 package com.example.integrationtestboot.integration;
 
-import com.example.integrationtestboot.IntegrationTestBootApplication;
 import com.example.integrationtestboot.dto.UserDTO;
 import com.example.integrationtestboot.entity.Role;
 import com.example.integrationtestboot.entity.User;
 import com.example.integrationtestboot.repository.UserRepository;
 import com.example.integrationtestboot.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.Test;
 
 import org.mockito.ArgumentCaptor;
@@ -33,7 +31,8 @@ public class UserServiceIT {
     @Autowired
     private UserService userService;
 
-    @MockBean
+   // @MockBean
+    @Autowired
     private UserRepository userRepository;
 
     @Captor
@@ -56,6 +55,23 @@ public class UserServiceIT {
         assertNotNull(capturedUser);
         assertEquals("Test User", capturedUser.getName());
         assertEquals(Role.USER, capturedUser.getRole());
+    }
+
+    @Test
+    public void saveTest() {
+        UserDTO newUser = new UserDTO();
+        newUser.setName("Test User");
+        newUser.setRole(Role.USER);
+
+        Long userId = userService.registerUser(newUser);
+
+        User retrive = userRepository.findUserById(userId);
+
+        assertNotNull(retrive);
+        assertEquals("Test User",retrive.getName());
+        assertEquals(Role.USER,retrive.getRole());
+
+
     }
 
     @Test
