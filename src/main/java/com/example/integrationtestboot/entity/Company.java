@@ -1,15 +1,16 @@
 package com.example.integrationtestboot.entity;
 
 import jakarta.persistence.*;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
 
-
+@EqualsAndHashCode
 @Setter
 @Getter
-@ToString
+@ToString(exclude = "user")
 @Entity
 @Table(name = "companies")
 public class Company {
@@ -18,7 +19,9 @@ public class Company {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
-    @ManyToOne
+
+    @JoinColumn(name = "user_id")
+    @ManyToOne(cascade = CascadeType.PERSIST) // or CascadeType.ALL if you want to cascade all operations
     private User user;
 
 }

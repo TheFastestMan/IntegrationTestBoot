@@ -10,8 +10,11 @@ public class UserMapper {
     public UserDTO userToUserDTO(User user) {
         UserDTO dto = new UserDTO();
         dto.setId(user.getId());
+        dto.setBirthDate(user.getBirthDate());
         dto.setRole(user.getRole());
-        dto.setName(user.getName());
+        dto.setEmail(user.getEmail());
+        dto.setLastname(user.getLastname());
+        dto.setFirstname(user.getFirstname());
         return dto;
     }
 
@@ -19,7 +22,10 @@ public class UserMapper {
         User user = new User();
         user.setId(dto.getId());
         user.setRole(dto.getRole());
-        user.setName(dto.getName());
+        user.setBirthDate(dto.getBirthDate());
+        user.setEmail(dto.getEmail());
+        user.setLastname(dto.getLastname());
+        user.setFirstname(dto.getFirstname());
         return user;
     }
 }

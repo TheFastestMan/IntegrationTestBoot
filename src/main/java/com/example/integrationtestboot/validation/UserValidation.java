@@ -10,7 +10,7 @@ public class UserValidation {
         if (userDTO == null) {
             throw new IllegalArgumentException("UserDTO cannot be null");
         }
-        if (!StringUtils.hasText(userDTO.getName())) {
+        if (!StringUtils.hasText(userDTO.getEmail())) {
             throw new IllegalArgumentException("User name is required");
         }
     }

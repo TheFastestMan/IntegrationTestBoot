@@ -6,6 +6,7 @@ import lombok.*;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 
@@ -16,10 +17,16 @@ import java.util.Objects;
 @AllArgsConstructor
 @RequiredArgsConstructor
 @ToString
-public class UserDTO {
+@EqualsAndHashCode
+public class
+UserDTO {
     private Long id;
     private Role role;
-    private String name;
+    private LocalDate birthDate;
+    private String email;
+    private String firstname;
+
+    private String lastname;
     private List<Company> owner;
 
 }

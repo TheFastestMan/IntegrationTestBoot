@@ -6,11 +6,13 @@ import com.example.integrationtestboot.listener.AccessType;
 import com.example.integrationtestboot.listener.EventEntity;
 import com.example.integrationtestboot.mapper.CompanyMapper;
 import com.example.integrationtestboot.repository.CompanyRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -42,38 +44,57 @@ public class CompanyService {
 
     @Transactional(readOnly = true)
     public Optional<CompanyDTO> findCompanyById(Long id) {
-        Company company = companyRepository.findCompanyById(id);
+        Optional<Company> company = companyRepository.findById(id);
         applicationEventPublisher.publishEvent(new EventEntity(company,
                 AccessType.READ, "Before"));
-        CompanyDTO companyDTO = companyMapper.toCompanyDTO(company);
+
+        CompanyDTO companyDTO = companyMapper.toCompanyDTO(company.get());
+
         applicationEventPublisher.publishEvent(new EventEntity(company,
                 AccessType.READ, "After"));
         return Optional.ofNullable(companyDTO);
     }
 
-    public String updateCompany(CompanyDTO companyDTO) {
-        Company company = companyMapper.toCompany(companyDTO);
-        applicationEventPublisher.publishEvent(new EventEntity(company,
-                AccessType.UPDATE, "Before"));
-        boolean companyVar = companyRepository.update(company);
-        applicationEventPublisher.publishEvent(new EventEntity(company,
-                AccessType.UPDATE, "After"));
-        if (companyVar == true) {
-            return "Company has updated";
-        }
-        return "Company has NOT updated!";
-    }
+    @Transactional
+    public CompanyDTO updateCompany(Long id, CompanyDTO companyDTO) {
+        // Find the existing company by ID
+        Optional<Company> existingCompanyOpt = companyRepository.findById(id);
 
-    public String deleteCompany(Long id) {
-        Company company = companyRepository.findCompanyById(id);
-        if (company != null) {
-            applicationEventPublisher.publishEvent(new EventEntity(company,
-                    AccessType.UPDATE, "Before"));
-            boolean companyVar = companyRepository.delete(id);
-            applicationEventPublisher.publishEvent(new EventEntity(company, AccessType.DELETE, "After"));
-            return companyVar ? "Company has deleted" : "Company has NOT deleted!";
+        // Check if company exists
+        if (!existingCompanyOpt.isPresent()) {
+            throw new EntityNotFoundException("Company with ID " + id + " not found");
         }
-        return "Company has NOT deleted!";
+
+        // Map the updates from CompanyDTO to existing Company entity
+        Company existingCompany = existingCompanyOpt.get();
+        existingCompany.setName(companyDTO.getName());
+        // ... (set other fields from DTO as needed)
+
+        // Before update event
+        applicationEventPublisher.publishEvent(new EventEntity(existingCompany,
+                AccessType.UPDATE, "Before"));
+
+        // Save the updated company entity
+        Company updatedCompany = companyRepository.save(existingCompany);
+
+        // After update event
+        applicationEventPublisher.publishEvent(new EventEntity(updatedCompany,
+                AccessType.UPDATE, "After"));
+
+        // Convert updated company entity back to DTO to return
+        return companyMapper.toCompanyDTO(updatedCompany);
+    }
+    @Transactional
+    public void deleteCompaniesStartingWithA() {
+        companyRepository.deleteByNameStartingWith("A");
+    }
+    @Transactional
+    public Optional<Company> findByName(String name) {
+        return companyRepository.findByName(name);
+    }
+    @Transactional
+    public List<Company> findAll() {
+        return companyRepository.findAll();
     }
 
 }

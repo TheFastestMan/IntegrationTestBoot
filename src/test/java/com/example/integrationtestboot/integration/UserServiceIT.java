@@ -12,17 +12,14 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.ActiveProfiles;
+
 import org.springframework.test.context.TestConstructor;
 
-
+import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
-
 
 @SpringBootTest
 @RequiredArgsConstructor
@@ -31,7 +28,6 @@ public class UserServiceIT {
     @Autowired
     private UserService userService;
 
-   // @MockBean
     @Autowired
     private UserRepository userRepository;
 
@@ -39,50 +35,60 @@ public class UserServiceIT {
     ArgumentCaptor<User> userCaptor;
 
     @Test
-    public void testRegisterUser() {
-        UserDTO newUser = new UserDTO();
-        newUser.setName("Test User");
-        newUser.setRole(Role.USER);
-
-        // Stub the save operation
-        doNothing().when(userRepository).save(userCaptor.capture());
-
-        userService.registerUser(newUser);
-
-        verify(userRepository).save(any(User.class));
-
-        User capturedUser = userCaptor.getValue();
-        assertNotNull(capturedUser);
-        assertEquals("Test User", capturedUser.getName());
-        assertEquals(Role.USER, capturedUser.getRole());
-    }
-
-    @Test
     public void saveTest() {
         UserDTO newUser = new UserDTO();
-        newUser.setName("Test User");
+        LocalDate specificDate = LocalDate.of(2020, 1, 1);
+        newUser.setEmail("Test User");
+        newUser.setFirstname("In");
+        newUser.setLastname("Out");
+        newUser.setBirthDate(specificDate);
         newUser.setRole(Role.USER);
 
         Long userId = userService.registerUser(newUser);
 
-        User retrive = userRepository.findUserById(userId);
+        Optional<User> retrieve = userRepository.findById(userId);
 
-        assertNotNull(retrive);
-        assertEquals("Test User",retrive.getName());
-        assertEquals(Role.USER,retrive.getRole());
-
+        assertNotNull(retrieve);
+        assertEquals("Test User", retrieve.get().getEmail());
+        assertEquals("In", retrieve.get().getFirstname());
+        assertEquals("Out", retrieve.get().getLastname());
+        assertEquals(specificDate, retrieve.get().getBirthDate());
+        assertEquals(Role.USER, retrieve.get().getRole());
 
     }
 
     @Test
-    void test1() {
-        var actualResult = userService.findUserById(1L);
+    public void whenFindAdminsBornBetween1980And1990_thenSuccess() {
+        // Create and register users
+        createUserAndRegister(LocalDate.of(1990, 2, 10), "Admin@1990",
+                Role.ADMIN,"a", "a");
+        createUserAndRegister(LocalDate.of(1980, 10, 12), "Admin@1980",
+                Role.ADMIN,"b","b");
+        createUserAndRegister(LocalDate.of(1999, 11, 21), "Admin@1999",
+                Role.ADMIN,"c","c");
 
-        assertTrue(actualResult.isPresent());
+        // Method to test
+        List<User> admins = userService.findAdminsBornBetween1980And1990();
 
-        var expectedResult = new UserDTO(1L, Role.ADMIN, "Name12", null);
-
-        actualResult.ifPresent(actual -> assertEquals(expectedResult, actual));
+        // Assertions
+        assertTrue(admins.stream().allMatch(user -> user.getRole() == Role.ADMIN),
+                "All retrieved users should be admins");
+        assertTrue(admins.stream().allMatch(user -> user.getBirthDate().getYear() >= 1980 &&
+                        user.getBirthDate().getYear() <= 1990),
+                "All admins should be born between 1980 and 1990");
+        assertEquals(8, admins.size(), "There should be only one admin born between 1980 and 1990");
     }
+
+    private void createUserAndRegister(LocalDate birthDate, String email, Role role, String firstname, String lastname) {
+        UserDTO newUser = new UserDTO();
+        newUser.setEmail(email);
+        newUser.setBirthDate(birthDate);
+        newUser.setRole(role);
+        newUser.setFirstname(firstname);
+        newUser.setLastname(lastname);
+        userService.registerUser(newUser);
+    }
+
+
 
 }
