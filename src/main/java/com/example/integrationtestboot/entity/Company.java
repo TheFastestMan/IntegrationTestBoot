@@ -18,10 +18,11 @@ public class Company {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private String name;
 
     @JoinColumn(name = "user_id")
-    @ManyToOne(cascade = CascadeType.PERSIST) // or CascadeType.ALL if you want to cascade all operations
+    @ManyToOne(cascade = CascadeType.PERSIST)
     private User user;
 
 }

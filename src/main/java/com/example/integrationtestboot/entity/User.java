@@ -27,6 +27,6 @@ public class User {
     private Role role;
 
     @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)
-    private List<Company> companies; // Renamed for clarity
+    private List<Company> companies;
 
 }

@@ -10,6 +10,10 @@ import com.example.integrationtestboot.repository.UserRepository;
 import com.example.integrationtestboot.validation.UserValidation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -57,6 +61,27 @@ public class UserService {
         LocalDate startDate = LocalDate.of(1980, 1, 1);
         LocalDate endDate = LocalDate.of(1990, 12, 31);
         return userRepository.findByRoleAndBirthDateBetween(Role.ADMIN, startDate, endDate);
+    }
+
+    public List<User> findFirst4Users() {
+        return userRepository.findFirst4ByOrderByIdDesc();
+    }
+
+    public List<User> findUsersWithDynamicSorting(String sortBy, String direction) {
+        Sort sort = Sort.by(Sort.Direction.fromString(direction), sortBy);
+        Pageable pageable = PageRequest.of(0, 4, sort);
+        return userRepository.findAll(pageable).getContent();
+    }
+
+    public List<User> findUsersWithDynamicSorting(Sort sort) {
+        Pageable pageable = PageRequest.of(0, 4, sort);
+        return userRepository.findAll(pageable).getContent();
+    }
+
+    public Page<User> findUsersFilteredByRoleWithDynamicSortingAndPagination(
+            Role role, Sort sort, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, sort);
+        return userRepository.findByRole(role, pageable);
     }
 
 }
